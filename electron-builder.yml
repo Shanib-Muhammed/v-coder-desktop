@@ -1,0 +1,83 @@
+appId: ai.vcoder.desktop
+productName: V-Coder
+copyright: Copyright © 2026 Shanib Muhammed
+directories:
+  output: dist
+  buildResources: build
+files:
+  - electron/**/*
+  - src/**/*
+  - package.json
+  - "!**/*.map"
+  - "!**/node_modules/**"
+asar: true
+compression: maximum
+artifactName: V-Coder-${version}-${os}-${arch}.${ext}
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: V-Coder
+  uninstallDisplayName: V-Coder
+  deleteAppDataOnUninstall: false
+
+portable:
+  artifactName: V-Coder-${version}-portable.${ext}
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+    - target: zip
+      arch:
+        - x64
+        - arm64
+
+dmg:
+  artifactName: V-Coder-${version}-mac-${arch}.${ext}
+
+linux:
+  icon: build/icon.png
+  category: Development
+  synopsis: Desktop AI coding studio
+  description: V-Coder is an open desktop AI coding studio. Connect any model provider, open a project, and build with an agent that runs tools on your machine.
+  maintainer: Shanib Muhammed <shanibmuhammed@users.noreply.github.com>
+  target:
+    - target: AppImage
+      arch:
+        - x64
+        - arm64
+    - target: deb
+      arch:
+        - x64
+        - arm64
+
+appImage:
+  artifactName: V-Coder-${version}-linux-${arch}.${ext}
+
+deb:
+  artifactName: V-Coder-${version}-linux-${arch}.${ext}
+
+publish:
+  provider: github
+  releaseType: release

@@ -1,0 +1,12 @@
+node_modules/
+dist/
+out/
+build/*.ico
+build/*.icns
+build/icon_*.png
+*.log
+.DS_Store
+Thumbs.db
+.env
+.env.*
+!.env.example
