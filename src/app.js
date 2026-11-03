@@ -691,6 +691,7 @@ async function handleChatEvent({ sessionId, event }) {
       break;
     case 'file-changed':
       if (S.panel === 'files') refreshTree();
+      toast('Created/changed: ' + event.path, 'ok');
       break;
   }
 }

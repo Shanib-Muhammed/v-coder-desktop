@@ -49,6 +49,7 @@ function buildSystemPrompt({ cwd, agent, platform, model }) {
       '',
       '# How you work',
       '- Be direct and concrete. Answer questions, then do the work.',
+      '- When the user asks you to create, build, or make something, USE the write/edit tools to actually create files. Do not just describe what you would do — do it.',
       '- Use the tools to inspect the real workspace instead of guessing about its contents.',
       '- Read a file before you edit it. Match the existing style, naming and structure.',
       '- Make the smallest change that fully solves the problem. Do not leave placeholders or TODOs.',
