@@ -38,23 +38,7 @@ nsis:
 portable:
   artifactName: V-Coder-${version}-portable.${ext}
 
-mac:
-  icon: build/icon.png
-  category: public.app-category.developer-tools
-  hardenedRuntime: true
-  gatekeeperAssess: false
-  target:
-    - target: dmg
-      arch:
-        - x64
-        - arm64
-    - target: zip
-      arch:
-        - x64
-        - arm64
 
-dmg:
-  artifactName: V-Coder-${version}-mac-${arch}.${ext}
 
 linux:
   icon: build/icon.png

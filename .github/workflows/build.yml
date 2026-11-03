@@ -26,10 +26,6 @@ jobs:
             os: windows-latest
             args: --win
             artifact: dist-win
-          - name: macOS
-            os: macos-latest
-            args: --mac
-            artifact: dist-mac
           - name: Linux
             os: ubuntu-latest
             args: --linux
@@ -68,8 +64,6 @@ jobs:
           name: ${{ matrix.artifact }}
           path: |
             dist/*.exe
-            dist/*.dmg
-            dist/*.zip
             dist/*.AppImage
             dist/*.deb
             dist/*.blockmap
@@ -98,8 +92,6 @@ jobs:
           generate_release_notes: true
           files: |
             dist/*.exe
-            dist/*.dmg
-            dist/*.zip
             dist/*.AppImage
             dist/*.deb
             dist/latest*.yml

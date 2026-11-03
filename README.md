@@ -24,7 +24,6 @@ Releases ship installers for every platform from GitHub Actions:
 | Platform | Package |
 | --- | --- |
 | Windows | `V-Coder-1.0.0-win-x64.exe` (installer) · `V-Coder-1.0.0-portable.exe` |
-| macOS | `V-Coder-1.0.0-mac-x64.dmg` · `V-Coder-1.0.0-mac-arm64.dmg` |
 | Linux | `V-Coder-1.0.0-linux-x64.AppImage` · `V-Coder-1.0.0-linux-x64.deb` |
 
 Grab them from the [Releases page](https://github.com/Shanib-Muhammed/v-coder-REA-desktop/releases).
