@@ -143,6 +143,11 @@ function createWindow() {
     },
   });
 
+  win.webContents.session.setPermissionRequestHandler((webContents, permission, callback) => {
+    if (permission === 'media' || permission === 'geolocation') callback(false);
+    else callback(true);
+  });
+
   win.loadFile(path.join(__dirname, '..', 'src', 'index.html'));
 
   if (isSmoke) {

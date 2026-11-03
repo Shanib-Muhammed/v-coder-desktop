@@ -20,6 +20,9 @@ const S = {
   running: new Set(),
   status: 'idle',
   panel: null,
+  browserUrl: 'https://www.google.com',
+  browserHistory: ['https://www.google.com'],
+  browserHistIndex: 0,
   tree: null,
   expanded: new Set(),
   editorTabs: [],
@@ -147,8 +150,11 @@ function renderShell() {
         <button class="icon-btn" data-act="open-palette" title="Command palette">
           ${icon('search', 15)}
         </button>
-        <button class="icon-btn" data-act="toggle-panel" data-panel="files" title="Toggle panel">
+        <button class="icon-btn" data-act="toggle-panel" data-panel="files" title="Files panel">
           ${icon('panel-right', 15)}
+        </button>
+        <button class="icon-btn" data-act="toggle-panel" data-panel="browser" title="Browser">
+          ${icon('globe', 15)}
         </button>
         ${
           mac
@@ -1739,6 +1745,7 @@ function togglePanel(tab) {
     S.panel = tab;
     if (tab === 'files' || tab === 'editor') refreshTree();
     if (tab === 'editor' && !S.activeEditor && S.editorTabs.length) openEditorTab(S.editorTabs[0].path);
+    if (tab === 'browser') renderBrowserPane();
   }
   renderDock();
   renderTitlebarState();
@@ -1757,6 +1764,7 @@ function renderDock() {
       <button class="dock-tab ${S.panel === 'files' ? 'active' : ''}" data-act="dock-tab" data-tab="files">${icon('files', 13)} Files</button>
       <button class="dock-tab ${S.panel === 'editor' ? 'active' : ''}" data-act="dock-tab" data-tab="editor">${icon('code', 13)} Editor</button>
       <button class="dock-tab ${S.panel === 'terminal' ? 'active' : ''}" data-act="dock-tab" data-tab="terminal">${icon('terminal', 13)} Terminal</button>
+      <button class="dock-tab ${S.panel === 'browser' ? 'active' : ''}" data-act="dock-tab" data-tab="browser">${icon('globe', 13)} Browser</button>
       <div style="flex:1"></div>
       <button class="icon-btn" data-act="close-panel" title="Close">${icon('x', 14)}</button>
     </div>
@@ -1764,11 +1772,13 @@ function renderDock() {
       <div class="dock-pane ${S.panel === 'files' ? '' : 'hidden'}" id="pane-files"></div>
       <div class="dock-pane ${S.panel === 'editor' ? '' : 'hidden'}" id="pane-editor"></div>
       <div class="dock-pane ${S.panel === 'terminal' ? '' : 'hidden'}" id="pane-terminal"></div>
+      <div class="dock-pane ${S.panel === 'browser' ? '' : 'hidden'}" id="pane-browser"></div>
     </div>`;
 
   if (S.panel === 'files') renderFilesPane();
   if (S.panel === 'editor') renderEditorPane();
   if (S.panel === 'terminal') renderTerminalPane();
+  if (S.panel === 'browser') renderBrowserPane();
 }
 
 async function refreshTree() {
@@ -1913,7 +1923,7 @@ function renderTerminalPane() {
     </div>`;
   const input = $('#term-input');
   const out = $('#term-out');
-  out.scrollTop = out.scrollHeight;
+  if (out) out.scrollTop = out.scrollHeight;
   input.addEventListener('keydown', async (e) => {
     if (e.key === 'Enter' && input.value.trim()) {
       const cmd = input.value.trim();
@@ -1926,6 +1936,54 @@ function renderTerminalPane() {
     }
   });
   input.focus();
+}
+
+function renderBrowserPane() {
+  const pane = $('#pane-browser');
+  if (!pane) return;
+  const url = S.browserUrl || 'https://www.google.com';
+  pane.innerHTML = `
+    <div class="browser-bar">
+      <button class="icon-btn" data-act="browser-back" title="Back">${icon('chevron-left', 13)}</button>
+      <button class="icon-btn" data-act="browser-forward" title="Forward">${icon('chevron-right', 13)}</button>
+      <button class="icon-btn" data-act="browser-refresh" title="Reload">${icon('refresh', 13)}</button>
+      <div class="browser-url">
+        ${icon('lock', 11)}
+        <input id="browser-input" value="${esc(url)}" spellcheck="false" />
+      </div>
+      <button class="icon-btn" data-act="browser-go" title="Go">${icon('arrow-right', 13)}</button>
+      <button class="icon-btn" data-act="browser-open-external" title="Open in system browser">${icon('external-link', 13)}</button>
+    </div>
+    <div class="browser-frame-wrap">
+      <webview id="browser-webview" src="${esc(url)}" style="width:100%;height:100%" allowpopups></webview>
+    </div>`;
+  const input = $('#browser-input');
+  const wv = $('#browser-webview');
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      let u = input.value.trim();
+      if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      S.browserUrl = u;
+      if (S.browserHistory[S.browserHistIndex] !== u) {
+        S.browserHistory = S.browserHistory.slice(0, S.browserHistIndex + 1);
+        S.browserHistory.push(u);
+        S.browserHistIndex = S.browserHistory.length - 1;
+      }
+      if (wv) wv.src = u;
+    }
+  });
+  if (wv) {
+    wv.addEventListener('did-navigate', (e) => {
+      S.browserUrl = e.url;
+      const inp = $('#browser-input');
+      if (inp) inp.value = e.url;
+    });
+    wv.addEventListener('did-navigate-in-page', (e) => {
+      S.browserUrl = e.url;
+      const inp = $('#browser-input');
+      if (inp) inp.value = e.url;
+    });
+  }
 }
 
 /* ---------------------------------------------------------------- statusbar */
@@ -2067,6 +2125,35 @@ document.addEventListener('click', async (e) => {
       renderDock();
     },
     'close-panel': () => togglePanel(S.panel),
+    'browser-back': () => {
+      const wv = document.querySelector('#browser-webview');
+      if (wv && wv.canGoBack) wv.goBack();
+    },
+    'browser-forward': () => {
+      const wv = document.querySelector('#browser-webview');
+      if (wv && wv.canGoForward) wv.goForward();
+    },
+    'browser-refresh': () => {
+      const wv = document.querySelector('#browser-webview');
+      if (wv) wv.reload();
+    },
+    'browser-go': () => {
+      const input = document.querySelector('#browser-input');
+      if (!input) return;
+      let u = input.value.trim();
+      if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+      S.browserUrl = u;
+      if (S.browserHistory[S.browserHistIndex] !== u) {
+        S.browserHistory = S.browserHistory.slice(0, S.browserHistIndex + 1);
+        S.browserHistory.push(u);
+        S.browserHistIndex = S.browserHistory.length - 1;
+      }
+      const wv = document.querySelector('#browser-webview');
+      if (wv) wv.src = u;
+    },
+    'browser-open-external': () => {
+      if (S.browserUrl && api) api.openExternal(S.browserUrl);
+    },
     'open-external': () => api.openExternal(t.dataset.url),
     'send': () => sendMessage(),
     'attach': async () => {
